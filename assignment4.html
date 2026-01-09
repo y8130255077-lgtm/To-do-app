@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Todo Project</title>
+    <style>
+        body { font-family: sans-serif;
+             margin: 20px; 
+            }
+
+        h1 { 
+            text-align: center;
+             color: lightblue;
+             }
+        .controls { 
+            display: flex;
+             justify-content: center;
+              gap: 10px;
+               margin-bottom: 20px; 
+            }
+        
+        button { 
+            padding: 10px 20px;
+             border-radius: 5px; 
+             cursor: pointer;
+              border: none;
+             }
+        #show-all { 
+            background-color: blue;
+             color: white;
+             }
+        #show-uncompleted { 
+            background-color: red;
+             color: white;
+             }
+        #show-completed {
+             background-color: green; 
+            color: white;
+         }
+
+        table {
+             width: 100%;
+             border-collapse: collapse;
+              margin-top: 10px;
+             }
+        th, td {
+             padding: 12px;
+             border: 1px solid grey;
+              text-align: left;
+             }
+        th {
+             background-color: navy;
+              color: white; 
+            }
+
+       
+        .status-completed {
+             background-color: lightgreen !important;
+             color: green;
+             }
+        .status-pending {
+             background-color: lightgrey !important;
+             color: brown; 
+            }
+        
+        .toggle-btn {
+             background: white;
+             border: 1px solid gray;
+              padding: 5px; 
+            }
+    </style>
+</head>
+<body>
+
+    <h1>Todo List Dashboard</h1>
+
+    <div class="controls">
+        <button id="show-all">Show All Tasks</button>
+        <button id="show-uncompleted">Get Uncompleted Tasks</button>
+        <button id="show-completed">Get Completed Tasks</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Task Title</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="todo-body"></tbody>
+    </table>
+
+    <script>
+        var apiUrl = 'https://jsonplaceholder.typicode.com/todos';
+        var todos = []; 
+
+       
+        async function fetchTodos() {
+            try {
+                var response = await fetch(apiUrl);
+                var data = await response.json();
+                
+                for (var i = 0; i < 50; i++) {
+                    todos.push(data[i]);
+                }
+                renderTable(todos);
+            } catch (err) {
+                console.log("Error a gaya: " + err);
+            }
+        }
+
+        
+        function renderTable(list) {
+            var tableBody = document.getElementById('todo-body');
+            tableBody.innerHTML = ''; 
+
+            for (var i = 0; i < list.length; i++) {
+                var item = list[i];
+                var row = document.createElement('tr');
+               
+                if (item.completed === true) {
+                    row.className = 'status-completed';
+                } else {
+                    row.className = 'status-pending';
+                }
+
+                row.innerHTML = '<td>' + item.id + '</td>' +
+                                '<td>' + item.title + '</td>' +
+                                '<td>' + (item.completed ? 'Done' : 'Pending') + '</td>' +
+                                '<td><button class="toggle-btn" onclick="toggleStatus(' + item.id + ')">Change Status</button></td>';
+                
+                tableBody.appendChild(row);
+            }
+        }
+
+        
+        function toggleStatus(id) {
+            for (var i = 0; i < todos.length; i++) {
+                if (todos[i].id === id) {
+                    todos[i].completed = !todos[i].completed;
+                    break;
+                }
+            }
+            renderTable(todos); 
+        }
+
+        
+        document.getElementById('show-uncompleted').onclick = function() {
+            var temp = [];
+            for (var i = 0; i < todos.length; i++) {
+                if (todos[i].completed === false) {
+                    temp.push(todos[i]);
+                }
+            }
+            renderTable(temp);
+        };
+
+        document.getElementById('show-completed').onclick = function() {
+            var temp = [];
+            for (var i = 0; i < todos.length; i++) {
+                if (todos[i].completed === true) {
+                    temp.push(todos[i]);
+                }
+            }
+            renderTable(temp);
+        };
+
+        document.getElementById('show-all').onclick = function() {
+            renderTable(todos);
+        };
+
+        fetchTodos();
+    </script>
+</body>
+</html>
